@@ -17,7 +17,6 @@ import {
 import { TimelineView } from "./TimelineView";
 import {
   findSourceVideo,
-  formatClock,
   formatTimecode,
   fromInputValue,
   outputTimestamp,
@@ -44,8 +43,7 @@ function App() {
   const [serverUrl, setServerUrl] = useState(() => localStorage.getItem("coscup.serverUrl") ?? DEFAULT_SERVER);
   const [roomId, setRoomId] = useState(() => localStorage.getItem("coscup.roomId") ?? "209");
   const [utcOffsetMinutes, setUtcOffsetMinutes] = useState(() => Number(localStorage.getItem("coscup.utcOffset") ?? "480"));
-  const [videos, setVideos] = useState<VideoInfo[]>([]);
-  const [selectedVideoPath, setSelectedVideoPath] = useState<string | null>(null);
+  const [video, setVideo] = useState<VideoInfo | null>(null);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [playheadMs, setPlayheadMs] = useState<number | null>(null);
   const [pendingSeekMs, setPendingSeekMs] = useState<number | null>(null);
@@ -54,6 +52,7 @@ function App() {
   const [exportMode, setExportMode] = useState<ExportMode>("stream_copy");
   const [toolsReady, setToolsReady] = useState<boolean | null>(null);
   const [loadingServer, setLoadingServer] = useState(false);
+  const [lastImportCount, setLastImportCount] = useState<number | null>(null);
   const [exporting, setExporting] = useState(false);
   const [results, setResults] = useState<ExportResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -70,13 +69,14 @@ function App() {
       .catch(() => setToolsReady(false));
   }, []);
 
-  const timelineVideos = useMemo<TimelineVideo[]>(
-    () => videos.map((video) => ({
+  const timelineVideo = useMemo<TimelineVideo | null>(
+    () => video ? {
       ...video,
       recordingStartMs: parseObsFilename(video.name, utcOffsetMinutes),
-    })),
-    [videos, utcOffsetMinutes],
+    } : null,
+    [video, utcOffsetMinutes],
   );
+  const timelineVideos = useMemo(() => timelineVideo ? [timelineVideo] : [], [timelineVideo]);
 
   const orderedMarkers = useMemo(() => sortedMarkers(markers), [markers]);
   const clips = useMemo<ClipWithSource[]>(
@@ -88,46 +88,32 @@ function App() {
   );
 
   const timelineBounds = useMemo(() => {
-    const starts = timelineVideos.flatMap((video) => video.recordingStartMs === null ? [] : [video.recordingStartMs]);
-    const ends = timelineVideos.flatMap((video) => video.recordingStartMs === null ? [] : [video.recordingStartMs + video.durationMs]);
-    const all = [...starts, ...ends, ...orderedMarkers.map((marker) => marker.recordedAtMs)];
-    if (all.length === 0) {
-      const hour = 3_600_000;
-      const now = Math.floor(Date.now() / hour) * hour;
-      return { start: now, end: now + hour };
-    }
-    const start = Math.min(...all);
-    const end = Math.max(...all);
-    return { start: start - 10_000, end: Math.max(end + 10_000, start + 60_000) };
-  }, [orderedMarkers, timelineVideos]);
+    const start = timelineVideo?.recordingStartMs ?? 0;
+    return { start, end: start + (timelineVideo?.durationMs ?? 60_000) };
+  }, [timelineVideo]);
 
-  const selectedVideo = timelineVideos.find((video) => video.path === selectedVideoPath) ?? null;
-  const invalidVideos = timelineVideos.filter((video) => video.recordingStartMs === null);
+  const selectedVideo = timelineVideo;
+  const invalidVideo = timelineVideo?.recordingStartMs === null;
   const unmappedClips = clips.filter((clip) => !clip.video);
+  const outOfRangeMarkers = timelineVideo
+    ? orderedMarkers.filter((marker) => marker.recordedAtMs < timelineBounds.start || marker.recordedAtMs > timelineBounds.end)
+    : orderedMarkers;
   const hasUnpaired = orderedMarkers.length % 2 === 1;
 
   useEffect(() => {
-    if (!selectedVideoPath && timelineVideos[0]) setSelectedVideoPath(timelineVideos[0].path);
-  }, [selectedVideoPath, timelineVideos]);
+    if (!selectedVideo) return;
+    const start = selectedVideo.recordingStartMs ?? 0;
+    setPlayheadMs(start);
+    setPendingSeekMs(null);
+    setManualInput(selectedVideo.recordingStartMs === null ? "" : toInputValue(start, utcOffsetMinutes));
+  }, [selectedVideo?.path, selectedVideo?.recordingStartMs, selectedVideo?.durationMs, utcOffsetMinutes]);
 
-  useEffect(() => {
-    if (playheadMs === null && selectedVideo?.recordingStartMs !== null && selectedVideo?.recordingStartMs !== undefined) {
-      setPlayheadMs(selectedVideo.recordingStartMs);
-      setManualInput(toInputValue(selectedVideo.recordingStartMs, utcOffsetMinutes));
-    }
-  }, [playheadMs, selectedVideo, utcOffsetMinutes]);
-
-  async function selectVideos() {
+  async function selectVideo() {
     try {
       setError(null);
-      const selected = await invoke<VideoInfo[]>("select_video_files");
-      if (selected.length === 0) return;
-      setVideos((current) => {
-        const merged = new Map(current.map((video) => [video.path, video]));
-        selected.forEach((video) => merged.set(video.path, video));
-        return [...merged.values()].sort((a, b) => a.name.localeCompare(b.name));
-      });
-      setSelectedVideoPath(selected[0].path);
+      const selected = await invoke<VideoInfo | null>("select_video_file");
+      if (!selected) return;
+      setVideo(selected);
       setResults([]);
     } catch (reason) {
       setError(errorMessage(reason));
@@ -142,21 +128,20 @@ function App() {
       return;
     }
     setLoadingServer(true);
+    setLastImportCount(null);
     setError(null);
     try {
-      const base = serverUrl.replace(/\/+$/, "");
-      const response = await fetch(`${base}/api/v1/rooms/${id}/events`);
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null) as { error?: string } | null;
-        throw new Error(payload?.error ?? `Server HTTP ${response.status}`);
-      }
-      const data = await response.json() as ServerEvent[];
+      const data = await invoke<Array<Pick<ServerEvent, "id" | "recorded_at_ms">>>("import_server_events", {
+        serverUrl: serverUrl.trim(),
+        roomId: id,
+      });
       setMarkers(data.map((item) => ({
         key: `server-${item.id}`,
         serverId: item.id,
         recordedAtMs: item.recorded_at_ms,
         source: "server",
       })));
+      setLastImportCount(data.length);
       setResults([]);
     } catch (reason) {
       setError(errorMessage(reason));
@@ -196,16 +181,21 @@ function App() {
   }
 
   function seekTimeline(timestampMs: number) {
-    const video = findSourceVideo(timestampMs, timestampMs, timelineVideos);
-    if (!video || video.recordingStartMs === null) return;
-    setSelectedVideoPath(video.path);
-    setPendingSeekMs(timestampMs);
-    setPlayheadMs(timestampMs);
+    if (!selectedVideo) return;
+    const timestamp = Math.max(timelineBounds.start, Math.min(timelineBounds.end, timestampMs));
+    const start = selectedVideo.recordingStartMs ?? 0;
+    setPlayheadMs(timestamp);
+    if (videoRef.current?.readyState) {
+      videoRef.current.currentTime = Math.max(0, Math.min(selectedVideo.durationMs / 1000, (timestamp - start) / 1000));
+    } else {
+      setPendingSeekMs(timestamp);
+    }
   }
 
   function applyPendingSeek() {
-    if (pendingSeekMs === null || !selectedVideo || selectedVideo.recordingStartMs === null || !videoRef.current) return;
-    videoRef.current.currentTime = Math.max(0, (pendingSeekMs - selectedVideo.recordingStartMs) / 1000);
+    if (pendingSeekMs === null || !selectedVideo || !videoRef.current) return;
+    const start = selectedVideo.recordingStartMs ?? 0;
+    videoRef.current.currentTime = Math.max(0, (pendingSeekMs - start) / 1000);
     setPendingSeekMs(null);
   }
 
@@ -262,8 +252,8 @@ function App() {
             {toolsReady ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
             {toolsReady === null ? "檢查 FFmpeg" : toolsReady ? "FFmpeg 就緒" : "FFmpeg 不可用"}
           </span>
-          <button className="toolbar-button" type="button" onClick={() => void selectVideos()}>
-            <FolderOpen size={18} />加入影片
+          <button className="toolbar-button" type="button" onClick={() => void selectVideo()}>
+            <FolderOpen size={18} />{video ? "更換影片" : "開啟影片"}
           </button>
           <button
             className="export-button"
@@ -287,32 +277,20 @@ function App() {
       <main className="editor-workspace">
         <aside className="source-sidebar">
           <div className="panel-heading">
-            <h2>來源影片</h2><span>{videos.length}</span>
+            <h2>來源影片</h2><span>{video ? "1 / 1" : "0 / 1"}</span>
           </div>
-          {videos.length === 0 ? (
-            <button className="source-empty" type="button" onClick={() => void selectVideos()}>
-              <UploadSimple size={28} /><strong>加入 OBS 影片</strong><span>MKV</span>
+          {!video ? (
+            <button className="source-empty" type="button" onClick={() => void selectVideo()}>
+              <UploadSimple size={28} /><strong>開啟 OBS 影片</strong><span>一次只使用一個 MKV</span>
             </button>
           ) : (
-            <div className="source-list">
-              {timelineVideos.map((video) => (
-                <button
-                  type="button"
-                  key={video.path}
-                  className={selectedVideoPath === video.path ? "selected" : ""}
-                  onClick={() => {
-                    setSelectedVideoPath(video.path);
-                    if (video.recordingStartMs !== null) setPlayheadMs(video.recordingStartMs);
-                  }}
-                >
-                  <FilmStrip size={22} />
-                  <span className="source-copy"><strong>{video.name.replace(/\.mkv$/i, "")}</strong><small>{formatTimecode(video.durationMs)} / {formatBytes(video.fileSizeBytes)}</small></span>
-                  {video.recordingStartMs === null && <Warning className="source-warning" size={16} weight="fill" />}
-                </button>
-              ))}
-            </div>
+            <button className="source-file selected" type="button" onClick={() => void selectVideo()} title="更換來源影片">
+              <FilmStrip size={22} />
+              <span className="source-copy"><strong>{video.name.replace(/\.mkv$/i, "")}</strong><small>{formatTimecode(video.durationMs)} / {formatBytes(video.fileSizeBytes)}</small></span>
+              {invalidVideo && <Warning className="source-warning" size={16} weight="fill" />}
+            </button>
           )}
-          {invalidVideos.length > 0 && <p className="inline-warning">{invalidVideos.length} 個檔名格式不符</p>}
+          {invalidVideo && <p className="inline-warning">檔名格式不符，時間軸可以播放，但無法對應 Server 時間針。</p>}
 
           <div className="source-settings">
             <label htmlFor="timezone">OBS 時區</label>
@@ -336,9 +314,8 @@ function App() {
                 controls
                 onLoadedMetadata={applyPendingSeek}
                 onTimeUpdate={(event) => {
-                  if (selectedVideo.recordingStartMs !== null) {
-                    setPlayheadMs(selectedVideo.recordingStartMs + event.currentTarget.currentTime * 1000);
-                  }
+                  const start = selectedVideo.recordingStartMs ?? 0;
+                  setPlayheadMs(start + event.currentTarget.currentTime * 1000);
                 }}
               />
             ) : (
@@ -356,13 +333,13 @@ function App() {
           <div className="timeline-section">
             <div className="timeline-toolbar">
               <div>
-                <strong>{playheadMs === null ? "00:00:00.000" : formatClock(playheadMs, utcOffsetMinutes)}</strong>
-                <span>{orderedMarkers.length} 針 / {clips.length} 段</span>
+                <strong>{playheadMs === null ? "00:00:00.000" : formatTimecode(playheadMs - timelineBounds.start)}</strong>
+                <span>{selectedVideo ? `${formatTimecode(selectedVideo.durationMs)} · ` : ""}{orderedMarkers.length} 針 / {clips.length} 段</span>
               </div>
               <button
                 className="toolbar-button compact"
                 type="button"
-                disabled={playheadMs === null}
+                disabled={playheadMs === null || !selectedVideo || invalidVideo}
                 onClick={() => playheadMs !== null && addMarker(playheadMs)}
               >
                 <Plus size={16} weight="bold" />播放位置加針
@@ -371,14 +348,12 @@ function App() {
             <TimelineView
               startMs={timelineBounds.start}
               endMs={timelineBounds.end}
-              utcOffsetMinutes={utcOffsetMinutes}
               markers={orderedMarkers}
-              videos={timelineVideos}
+              video={timelineVideo}
               playheadMs={playheadMs}
               onMoveMarker={updateMarker}
               onSeek={seekTimeline}
             />
-            <div className="track-labels"><span>影片軌</span><span>時間針</span></div>
           </div>
         </section>
 
@@ -392,6 +367,7 @@ function App() {
               <input id="room-id" type="number" min="1" value={roomId} onChange={(event) => setRoomId(event.target.value)} />
               <button type="submit" disabled={loadingServer}>{loadingServer ? "匯入中" : "匯入"}</button>
             </div>
+            {lastImportCount !== null && <p className="import-status"><CheckCircle size={14} weight="fill" />已匯入 {lastImportCount} 個時間針</p>}
           </form>
 
           <div className="marker-inspector">
@@ -421,6 +397,7 @@ function App() {
               </ol>
             )}
             {hasUnpaired && <p className="inline-warning">最後一針尚未配對</p>}
+            {outOfRangeMarkers.length > 0 && selectedVideo && <p className="inline-warning">{outOfRangeMarkers.length} 針不在這支影片範圍內</p>}
           </div>
 
           <form className="exact-marker" onSubmit={addExactMarker}>
@@ -432,7 +409,7 @@ function App() {
                 step="0.001"
                 value={manualInput}
                 onFocus={() => {
-                  if (!manualInput) setManualInput(toInputValue(playheadMs ?? timelineBounds.start, utcOffsetMinutes));
+                  if (!manualInput && !invalidVideo) setManualInput(toInputValue(playheadMs ?? timelineBounds.start, utcOffsetMinutes));
                 }}
                 onChange={(event) => setManualInput(event.target.value)}
               />
@@ -479,4 +456,3 @@ function errorMessage(reason: unknown): string {
 }
 
 export default App;
-

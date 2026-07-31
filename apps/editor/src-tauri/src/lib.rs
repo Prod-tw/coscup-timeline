@@ -1,9 +1,10 @@
 use std::{
     fs,
     path::{Path, PathBuf},
+    time::Duration,
 };
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_shell::{ShellExt, process::Output};
@@ -52,6 +53,17 @@ struct ToolStatus {
     ffprobe: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+struct ServerEvent {
+    id: i64,
+    recorded_at_ms: i64,
+}
+
+#[derive(Debug, Deserialize)]
+struct ServerError {
+    error: Option<String>,
+}
+
 #[derive(Debug, Deserialize)]
 struct ProbeResult {
     format: ProbeFormat,
@@ -73,24 +85,89 @@ struct ProbeStream {
 }
 
 #[tauri::command]
-async fn select_video_files(app: AppHandle) -> Result<Vec<VideoInfo>, String> {
+async fn select_video_file(app: AppHandle) -> Result<Option<VideoInfo>, String> {
     let selected = app
         .dialog()
         .file()
         .add_filter("OBS Matroska video", &["mkv"])
-        .blocking_pick_files()
-        .unwrap_or_default();
+        .blocking_pick_file();
 
-    let mut videos = Vec::with_capacity(selected.len());
-    for file in selected {
-        let path = file.into_path().map_err(|error| error.to_string())?;
-        app.asset_protocol_scope()
-            .allow_file(&path)
-            .map_err(|error| error.to_string())?;
-        videos.push(probe_video(&app, &path).await?);
+    let Some(file) = selected else {
+        return Ok(None);
+    };
+    let path = file.into_path().map_err(|error| error.to_string())?;
+    app.asset_protocol_scope()
+        .allow_file(&path)
+        .map_err(|error| error.to_string())?;
+    probe_video(&app, &path).await.map(Some)
+}
+
+#[tauri::command]
+async fn import_server_events(
+    server_url: String,
+    room_id: i64,
+) -> Result<Vec<ServerEvent>, String> {
+    if room_id <= 0 {
+        return Err("廳 ID 必須是正整數".into());
     }
-    videos.sort_by(|a, b| a.name.cmp(&b.name));
-    Ok(videos)
+    let url = server_events_url(&server_url, room_id)?;
+    fetch_json(url).await
+}
+
+fn server_events_url(server_url: &str, room_id: i64) -> Result<reqwest::Url, String> {
+    let mut url = reqwest::Url::parse(server_url.trim())
+        .map_err(|_| "Server URL 格式無效，請輸入 http:// 或 https:// 網址".to_string())?;
+    if !matches!(url.scheme(), "http" | "https") || url.host().is_none() {
+        return Err("Server URL 必須是有效的 http:// 或 https:// 網址".into());
+    }
+    url.set_query(None);
+    url.set_fragment(None);
+    let room_id = room_id.to_string();
+    url.path_segments_mut()
+        .map_err(|_| "Server URL 無法附加 API 路徑".to_string())?
+        .pop_if_empty()
+        .extend(["api", "v1", "rooms", room_id.as_str(), "events"]);
+    Ok(url)
+}
+
+async fn fetch_json<T: DeserializeOwned>(url: reqwest::Url) -> Result<T, String> {
+    let client = reqwest::Client::builder()
+        .connect_timeout(Duration::from_secs(5))
+        .timeout(Duration::from_secs(15))
+        .build()
+        .map_err(|error| format!("無法建立網路連線: {error}"))?;
+    let response = client.get(url.clone()).send().await.map_err(|error| {
+        if error.is_timeout() {
+            format!(
+                "連線逾時，請確認 Server 正在執行且可從這台電腦連線：{}",
+                url.origin().ascii_serialization()
+            )
+        } else if error.is_connect() {
+            format!(
+                "無法連線到 {}，請確認網址、連接埠與 Server 狀態",
+                url.origin().ascii_serialization()
+            )
+        } else {
+            format!("匯入時間資料失敗: {error}")
+        }
+    })?;
+    let status = response.status();
+    let body = response
+        .text()
+        .await
+        .map_err(|error| format!("無法讀取 Server 回應: {error}"))?;
+    if !status.is_success() {
+        let detail = serde_json::from_str::<ServerError>(&body)
+            .ok()
+            .and_then(|payload| payload.error)
+            .unwrap_or_else(|| body.chars().take(240).collect());
+        return Err(if detail.trim().is_empty() {
+            format!("Server 回傳 HTTP {status}")
+        } else {
+            format!("Server 回傳 HTTP {status}: {detail}")
+        });
+    }
+    serde_json::from_str(&body).map_err(|error| format!("Server 回應不是有效的時間資料: {error}"))
 }
 
 #[tauri::command]
@@ -294,7 +371,8 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            select_video_files,
+            select_video_file,
+            import_server_events,
             select_output_directory,
             check_tools,
             export_clips
@@ -306,6 +384,11 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        io::{BufRead, BufReader, Write},
+        net::TcpListener,
+        thread,
+    };
 
     #[test]
     fn stream_copy_preserves_streams_without_reencoding() {
@@ -319,6 +402,49 @@ mod tests {
         let args = ffmpeg_args(&job, Path::new("/tmp/clip.mp4"));
         assert!(args.windows(2).any(|pair| pair == ["-c", "copy"]));
         assert_eq!(args.last().unwrap(), "/tmp/clip.mp4");
+    }
+
+    #[test]
+    fn builds_server_event_url_and_preserves_base_path() {
+        let url = server_events_url("https://times.example.test/coscup/?debug=1", 209).unwrap();
+        assert_eq!(
+            url.as_str(),
+            "https://times.example.test/coscup/api/v1/rooms/209/events"
+        );
+    }
+
+    #[test]
+    fn rejects_non_http_server_urls() {
+        assert!(server_events_url("file:///tmp/events.json", 209).is_err());
+        assert!(server_events_url("localhost:3000", 209).is_err());
+    }
+
+    #[test]
+    fn fetches_server_events_over_http() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request_line = String::new();
+            BufReader::new(stream.try_clone().unwrap())
+                .read_line(&mut request_line)
+                .unwrap();
+            assert_eq!(request_line, "GET /api/v1/rooms/209/events HTTP/1.1\r\n");
+            let body = r#"[{"id":7,"recorded_at_ms":1785438634000}]"#;
+            write!(
+                stream,
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            )
+            .unwrap();
+        });
+
+        let url = server_events_url(&format!("http://{address}"), 209).unwrap();
+        let events: Vec<ServerEvent> = tauri::async_runtime::block_on(fetch_json(url)).unwrap();
+        server.join().unwrap();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].id, 7);
+        assert_eq!(events[0].recorded_at_ms, 1_785_438_634_000);
     }
 
     #[test]

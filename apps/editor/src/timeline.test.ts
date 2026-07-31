@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { findSourceVideo, pairMarkers, parseObsFilename, sortedMarkers } from "./timeline";
+import {
+  findSourceVideo,
+  formatTimelineOffset,
+  pairMarkers,
+  parseObsFilename,
+  sortedMarkers,
+  timelineTickInterval,
+} from "./timeline";
 import type { Marker, TimelineVideo } from "./types";
 
 describe("OBS time mapping", () => {
@@ -40,3 +47,15 @@ describe("source mapping", () => {
   });
 });
 
+describe("zoomable timeline scale", () => {
+  it("uses denser ticks as the same video is zoomed in", () => {
+    expect(timelineTickInterval(3_600_000, 800)).toBe(10 * 60_000);
+    expect(timelineTickInterval(3_600_000, 8_000)).toBe(60_000);
+  });
+
+  it("formats relative timeline positions", () => {
+    expect(formatTimelineOffset(0)).toBe("00:00");
+    expect(formatTimelineOffset(3_723_000)).toBe("01:02:03");
+    expect(formatTimelineOffset(12_340, 500)).toBe("00:12.3");
+  });
+});

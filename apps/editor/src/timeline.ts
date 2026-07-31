@@ -78,6 +78,31 @@ export function formatTimecode(durationMs: number): string {
   return [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":") + `.${String(millis).padStart(3, "0")}`;
 }
 
+const TIMELINE_INTERVALS_MS = [
+  100, 200, 500,
+  1_000, 2_000, 5_000, 10_000, 15_000, 30_000,
+  60_000, 2 * 60_000, 5 * 60_000, 10 * 60_000, 15 * 60_000, 30 * 60_000,
+  60 * 60_000,
+];
+
+export function timelineTickInterval(durationMs: number, contentWidthPx: number): number {
+  const targetTickCount = Math.max(1, contentWidthPx / 84);
+  const targetInterval = Math.max(1, durationMs) / targetTickCount;
+  return TIMELINE_INTERVALS_MS.find((interval) => interval >= targetInterval)
+    ?? Math.ceil(targetInterval / 3_600_000) * 3_600_000;
+}
+
+export function formatTimelineOffset(offsetMs: number, intervalMs = 1_000): string {
+  const value = Math.max(0, Math.round(offsetMs));
+  const hours = Math.floor(value / 3_600_000);
+  const minutes = Math.floor((value % 3_600_000) / 60_000);
+  const seconds = Math.floor((value % 60_000) / 1_000);
+  const base = hours > 0
+    ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return intervalMs < 1_000 ? `${base}.${Math.floor((value % 1_000) / 100)}` : base;
+}
+
 export function formatClock(timestampMs: number, utcOffsetMinutes: number, includeDate = false): string {
   const date = new Date(timestampMs + utcOffsetMinutes * 60_000);
   const pad = (value: number) => String(value).padStart(2, "0");
@@ -88,4 +113,3 @@ export function formatClock(timestampMs: number, utcOffsetMinutes: number, inclu
 export function outputTimestamp(timestampMs: number, utcOffsetMinutes: number): string {
   return toInputValue(timestampMs, utcOffsetMinutes).replace("T", "_").replaceAll(":", "-").replace(".000", "");
 }
-

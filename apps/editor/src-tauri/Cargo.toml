@@ -12,10 +12,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.4.1", features = [] }
 
 [dependencies]
+reqwest = { version = "0.13.4", features = ["json"] }
 serde.workspace = true
 serde_json.workspace = true
 tauri = { version = "2.11.5", features = ["protocol-asset"] }
 tauri-plugin-dialog = "2.4.0"
 tauri-plugin-shell = "2.3.3"
 thiserror.workspace = true
-

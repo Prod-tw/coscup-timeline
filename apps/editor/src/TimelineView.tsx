@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import type { Marker, TimelineVideo } from "./types";
 import { formatClock, sortedMarkers } from "./timeline";
 
-interface TimelineProps {
+interface TimelineViewProps {
   startMs: number;
   endMs: number;
   utcOffsetMinutes: number;
@@ -13,7 +13,7 @@ interface TimelineProps {
   onSeek: (timestampMs: number) => void;
 }
 
-export function Timeline({
+export function TimelineView({
   startMs,
   endMs,
   utcOffsetMinutes,
@@ -22,7 +22,7 @@ export function Timeline({
   playheadMs,
   onMoveMarker,
   onSeek,
-}: TimelineProps) {
+}: TimelineViewProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const duration = Math.max(1, endMs - startMs);
   const ordered = useMemo(() => sortedMarkers(markers), [markers]);
@@ -82,4 +82,3 @@ export function Timeline({
     </div>
   );
 }
-

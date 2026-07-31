@@ -14,7 +14,7 @@ import {
   Warning,
   X,
 } from "@phosphor-icons/react";
-import { Timeline } from "./Timeline";
+import { TimelineView } from "./TimelineView";
 import {
   findSourceVideo,
   formatClock,
@@ -368,7 +368,7 @@ function App() {
                 <Plus size={16} weight="bold" />播放位置加針
               </button>
             </div>
-            <Timeline
+            <TimelineView
               startMs={timelineBounds.start}
               endMs={timelineBounds.end}
               utcOffsetMinutes={utcOffsetMinutes}

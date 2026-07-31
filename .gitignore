@@ -1,0 +1,11 @@
+/target/
+/node_modules/
+**/node_modules/
+**/dist/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+apps/editor/src-tauri/binaries/*
+!apps/editor/src-tauri/binaries/.gitkeep
+

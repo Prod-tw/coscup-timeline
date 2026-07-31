@@ -1,0 +1,62 @@
+name: Editor bundles
+
+on:
+  workflow_dispatch:
+  push:
+
+concurrency:
+  group: editor-bundles-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: ubuntu-24.04
+            artifact: linux-x64
+            target: x86_64-unknown-linux-gnu
+          - platform: macos-latest
+            artifact: macos-x64
+            target: x86_64-apple-darwin
+          - platform: windows-latest
+            artifact: windows-x64
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          architecture: x64
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Prepare FFmpeg sidecars
+        run: pnpm prepare:sidecars -- --target=${{ matrix.target }}
+      - name: Build editor bundle
+        run: pnpm --filter @coscup/editor tauri build --target ${{ matrix.target }}
+      - name: Upload editor bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: coscup-cut-${{ matrix.artifact }}
+          path: target/${{ matrix.target }}/release/bundle/**/*
+          if-no-files-found: error
+          retention-days: 30

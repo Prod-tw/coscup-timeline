@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions for the COSCUP Cut main window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        { "name": "binaries/coscup-ffmpeg", "sidecar": true, "args": true },
+        { "name": "binaries/coscup-ffprobe", "sidecar": true, "args": true }
+      ]
+    }
+  ]
+}

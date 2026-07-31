@@ -1,0 +1,17 @@
+{
+  "name": "coscup-time-suite",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "build": "pnpm --filter @coscup/dashboard build && pnpm --filter @coscup/editor build && cargo build --workspace",
+    "build:dashboard": "pnpm --filter @coscup/dashboard build",
+    "dev:dashboard": "pnpm --filter @coscup/dashboard dev",
+    "dev:editor": "pnpm prepare:sidecars && pnpm --filter @coscup/editor tauri dev",
+    "dev:server": "cargo run -p coscup-time-server",
+    "editor:build": "pnpm prepare:sidecars && pnpm --filter @coscup/editor tauri build",
+    "prepare:sidecars": "node scripts/prepare-sidecars.mjs",
+    "test": "pnpm -r test && cargo test --workspace",
+    "typecheck": "pnpm -r typecheck && cargo check --workspace"
+  }
+}
+

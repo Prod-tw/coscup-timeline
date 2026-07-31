@@ -1,0 +1,13 @@
+.git/
+.github/
+target/
+node_modules/
+**/node_modules/
+**/dist/
+**/coverage/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+apps/editor/src-tauri/binaries/*
+!apps/editor/src-tauri/binaries/.gitkeep

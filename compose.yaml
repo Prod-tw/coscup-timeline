@@ -1,0 +1,12 @@
+services:
+  time-server:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - time-data:/data
+    restart: unless-stopped
+
+volumes:
+  time-data:
+

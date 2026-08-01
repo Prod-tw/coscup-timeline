@@ -352,6 +352,7 @@ function App() {
               video={timelineVideo}
               playheadMs={playheadMs}
               onMoveMarker={updateMarker}
+              onDeleteMarker={removeMarker}
               onSeek={seekTimeline}
             />
           </div>

@@ -15,6 +15,7 @@ interface TimelineViewProps {
   video: TimelineVideo | null;
   playheadMs: number | null;
   onMoveMarker: (key: string, timestampMs: number) => void;
+  onDeleteMarker: (key: string) => void;
   onSeek: (timestampMs: number) => void;
 }
 
@@ -29,6 +30,7 @@ export function TimelineView({
   video,
   playheadMs,
   onMoveMarker,
+  onDeleteMarker,
   onSeek,
 }: TimelineViewProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,7 @@ export function TimelineView({
   const pendingScrollRef = useRef<{ ratio: number; anchorPx: number } | null>(null);
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const [viewportWidth, setViewportWidth] = useState(720);
+  const [selectedMarkerKey, setSelectedMarkerKey] = useState<string | null>(null);
   const duration = Math.max(1, endMs - startMs);
   const contentWidth = Math.max(viewportWidth, Math.round(viewportWidth * zoom));
   const ordered = useMemo(() => sortedMarkers(markers), [markers]);
@@ -71,6 +74,27 @@ export function TimelineView({
     pendingScrollRef.current = null;
   }, [zoom]);
 
+  useEffect(() => {
+    setSelectedMarkerKey((current) => (
+      current !== null && !markers.some((marker) => marker.key === current) ? null : current
+    ));
+  }, [markers]);
+
+  useEffect(() => {
+    if (selectedMarkerKey === null) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Delete" && event.key !== "Backspace") return;
+      if (isTextEditingTarget(event.target)) return;
+      event.preventDefault();
+      setSelectedMarkerKey(null);
+      onDeleteMarker(selectedMarkerKey);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onDeleteMarker, selectedMarkerKey]);
+
   const positionPx = (timestampMs: number) => ((timestampMs - startMs) / duration) * contentWidth;
   const timestampFromPointer = (clientX: number) => {
     const surface = surfaceRef.current;
@@ -101,6 +125,7 @@ export function TimelineView({
 
   function handleSurfacePointerDown(event: PointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
+    setSelectedMarkerKey(null);
     event.currentTarget.setPointerCapture(event.pointerId);
     seekFromPointer(event);
   }
@@ -195,11 +220,13 @@ export function TimelineView({
             return (
               <button
                 type="button"
-                className={`timeline-marker ${index % 2 === 0 ? "is-start" : "is-end"}`}
+                className={`timeline-marker ${index % 2 === 0 ? "is-start" : "is-end"}${selectedMarkerKey === marker.key ? " is-selected" : ""}`}
                 key={marker.key}
                 style={{ left: positionPx(marker.recordedAtMs) }}
                 title={`${index % 2 === 0 ? "開始" : "結束"} ${formatTimelineOffset(marker.recordedAtMs - startMs, 100)}`}
-                aria-label={`拖曳第 ${index + 1} 個時間針`}
+                aria-label={`第 ${index + 1} 個時間針`}
+                aria-pressed={selectedMarkerKey === marker.key}
+                onClick={() => setSelectedMarkerKey(marker.key)}
                 onPointerDown={(event) => {
                   event.stopPropagation();
                   event.currentTarget.setPointerCapture(event.pointerId);
@@ -218,4 +245,9 @@ export function TimelineView({
       </div>
     </div>
   );
+}
+
+function isTextEditingTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement
+    && (target.matches("input, textarea, select") || target.isContentEditable);
 }

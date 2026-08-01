@@ -146,6 +146,12 @@ select { appearance: auto; }
 .timeline-marker span { position: absolute; top: 0; left: 1px; width: 18px; height: 17px; display: grid; place-items: center; border-radius: 3px; background: var(--accent-strong); font: 800 8px ui-monospace, monospace; }
 .timeline-marker.is-end span { background: #aab3ad; color: #242a26; }
 .timeline-marker:hover span { transform: scale(1.12); }
+.timeline-marker.is-selected { z-index: 5; }
+.timeline-marker.is-selected::before { width: 3px; background: #f0cc65; }
+.timeline-marker.is-selected span {
+  transform: scale(1.12); outline: 2px solid #f0cc65; outline-offset: 2px;
+  box-shadow: 0 0 0 1px #171c19;
+}
 
 .server-import, .marker-inspector, .exact-marker, .export-settings { padding: 14px; border-bottom: 1px solid var(--line); }
 .server-import { display: grid; gap: 7px; }

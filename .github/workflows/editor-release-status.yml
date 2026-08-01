@@ -41,6 +41,28 @@ jobs:
               for (const step of job.steps ?? []) {
                 lines.push(`  ${step.number}. ${step.name}: ${step.conclusion}`);
               }
+              if (job.conclusion === 'failure') {
+                try {
+                  const response = await github.request(
+                    'GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs',
+                    {
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      job_id: job.id,
+                    },
+                  );
+                  const log = typeof response.data === 'string'
+                    ? response.data
+                    : Buffer.from(response.data).toString('utf8');
+                  const tail = log
+                    .replace(/\u001b\[[0-9;]*m/g, '')
+                    .split(/\r?\n/)
+                    .slice(-120);
+                  lines.push('', `Log tail for ${job.name}:`, ...tail, '');
+                } catch (error) {
+                  lines.push(`  Unable to fetch job log: ${error.message}`);
+                }
+              }
             }
             fs.writeFileSync('editor-release-status.txt', `${lines.join('\n')}\n`);
 

@@ -1,0 +1,104 @@
+Editor release: success
+Run: https://github.com/Prod-tw/coscup-timeline/actions/runs/30707591096
+Tag: v0.1.0
+
+Build macos-apple-silicon: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: skipped
+  8. Restore Apple Silicon FFmpeg: success
+  9. Build static Apple Silicon FFmpeg: success
+  10. Add Apple Silicon FFmpeg to PATH: success
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  28. Post Restore Apple Silicon FFmpeg: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Build linux-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: success
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: success
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Build macos-intel: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: success
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Build windows-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: success
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Publish release: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run actions/setup-node@v7: success
+  4. Run actions/download-artifact@v8: success
+  5. Verify complete release asset set: success
+  6. Create draft release and upload assets: success
+  7. Publish verified release: success
+  13. Post Run actions/setup-node@v7: success
+  14. Post Run actions/checkout@v7: success
+  15. Complete job: success

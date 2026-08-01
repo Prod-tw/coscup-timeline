@@ -1,15 +1,16 @@
-name: Editor bundles
+name: Editor release
 
 on:
-  workflow_dispatch:
   push:
+    tags: ["v*"]
 
 concurrency:
-  group: editor-bundles-${{ github.ref }}
-  cancel-in-progress: true
+  group: editor-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
+    name: Build ${{ matrix.variant }}
     permissions:
       contents: read
     strategy:
@@ -17,15 +18,27 @@ jobs:
       matrix:
         include:
           - platform: ubuntu-24.04
-            artifact: linux-x64
+            variant: linux-x86_64
             target: x86_64-unknown-linux-gnu
-          - platform: macos-latest
-            artifact: macos-x64
-            target: x86_64-apple-darwin
+            bundles: appimage,deb,rpm
+            ffmpeg: prebuilt
           - platform: windows-latest
-            artifact: windows-x64
+            variant: windows-x86_64
             target: x86_64-pc-windows-msvc
+            bundles: nsis,msi
+            ffmpeg: prebuilt
+          - platform: macos-15-intel
+            variant: macos-intel
+            target: x86_64-apple-darwin
+            bundles: dmg
+            ffmpeg: prebuilt
+          - platform: macos-15
+            variant: macos-apple-silicon
+            target: aarch64-apple-darwin
+            bundles: dmg
+            ffmpeg: build-arm64
     runs-on: ${{ matrix.platform }}
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -41,22 +54,123 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: ". -> target"
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+
+      - name: Set up prebuilt FFmpeg
+        if: matrix.ffmpeg == 'prebuilt'
+        uses: FedericoCarboni/setup-ffmpeg@v3
         with:
           architecture: x64
+
+      - name: Restore Apple Silicon FFmpeg
+        if: matrix.ffmpeg == 'build-arm64'
+        id: arm64-ffmpeg-cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.tool_cache }}/coscup-ffmpeg-arm64
+          key: ffmpeg-8.0.1-x264-b35605ac-macos-arm64-v1
+
+      - name: Build static Apple Silicon FFmpeg
+        if: matrix.ffmpeg == 'build-arm64' && steps.arm64-ffmpeg-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          brew install nasm pkg-config
+
+          prefix="$RUNNER_TOOL_CACHE/coscup-ffmpeg-arm64"
+          jobs="$(sysctl -n hw.ncpu)"
+          x264_source="$RUNNER_TEMP/x264"
+          ffmpeg_source="$RUNNER_TEMP/ffmpeg-8.0.1"
+          ffmpeg_archive="$RUNNER_TEMP/ffmpeg-8.0.1.tar.xz"
+
+          git clone https://code.videolan.org/videolan/x264.git "$x264_source"
+          git -C "$x264_source" checkout b35605ace3ddf7c1a5d67a2eb553f034aef41d55
+          "$x264_source/configure" --prefix="$prefix" --enable-static --disable-cli --disable-opencl
+          make -C "$x264_source" -j"$jobs"
+          make -C "$x264_source" install
+
+          curl --fail --location --silent --show-error \
+            https://ffmpeg.org/releases/ffmpeg-8.0.1.tar.xz \
+            --output "$ffmpeg_archive"
+          echo "05ee0b03119b45c0bdb4df654b96802e909e0a752f72e4fe3794f487229e5a41  $ffmpeg_archive" \
+            | shasum -a 256 --check
+          tar -xf "$ffmpeg_archive" -C "$RUNNER_TEMP"
+
+          export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
+          "$ffmpeg_source/configure" \
+            --prefix="$prefix" \
+            --pkg-config-flags=--static \
+            --extra-cflags="-I$prefix/include" \
+            --extra-ldflags="-L$prefix/lib -Wl,-search_paths_first" \
+            --enable-gpl \
+            --enable-libx264 \
+            --enable-static \
+            --disable-shared \
+            --disable-autodetect \
+            --disable-debug \
+            --disable-doc \
+            --disable-ffplay
+          make -C "$ffmpeg_source" -j"$jobs"
+          make -C "$ffmpeg_source" install
+
+          if otool -L "$prefix/bin/ffmpeg" "$prefix/bin/ffprobe" | grep -E '/opt/homebrew|/usr/local'; then
+            echo "FFmpeg contains non-portable Homebrew library references" >&2
+            exit 1
+          fi
+
+      - name: Add Apple Silicon FFmpeg to PATH
+        if: matrix.ffmpeg == 'build-arm64'
+        shell: bash
+        run: echo "$RUNNER_TOOL_CACHE/coscup-ffmpeg-arm64/bin" >> "$GITHUB_PATH"
+
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y file libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
+        run: sudo apt-get update && sudo apt-get install -y file libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf rpm xdg-utils
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Prepare FFmpeg sidecars
         run: pnpm prepare:sidecars -- --target=${{ matrix.target }}
-      - name: Build editor bundle
-        run: pnpm --filter @coscup/editor tauri build --target ${{ matrix.target }}
-      - name: Upload editor bundle
+
+      - name: Build editor bundles
+        run: pnpm --filter @coscup/editor tauri build --target ${{ matrix.target }} --bundles "${{ matrix.bundles }}"
+
+      - name: Collect release assets
+        run: node scripts/release-assets.mjs collect --target=${{ matrix.target }} --variant=${{ matrix.variant }}
+
+      - name: Upload release assets
         uses: actions/upload-artifact@v7
         with:
-          name: coscup-cut-${{ matrix.artifact }}
-          path: target/${{ matrix.target }}/release/bundle/**/*
+          name: coscup-cut-${{ matrix.variant }}
+          path: release-assets/*
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 7
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: coscup-cut-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Verify complete release asset set
+        run: node scripts/release-assets.mjs verify --tag=${{ github.ref_name }}
+
+      - name: Create draft release and upload assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --verify-tag --draft --title "COSCUP Cut $GITHUB_REF_NAME" --notes-file .github/editor-release-notes.md
+
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest

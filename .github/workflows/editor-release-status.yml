@@ -1,0 +1,58 @@
+name: Editor release status
+
+on:
+  workflow_run:
+    workflows: ["Editor release"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+
+      - name: Write workflow result
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('node:fs');
+            const run = context.payload.workflow_run;
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: run.id,
+              per_page: 100,
+            });
+            const lines = [
+              `Editor release: ${run.conclusion}`,
+              `Run: ${run.html_url}`,
+              `Tag: ${run.head_branch}`,
+              '',
+            ];
+            for (const job of jobs) {
+              lines.push(`${job.name}: ${job.conclusion}`);
+              for (const step of job.steps ?? []) {
+                lines.push(`  ${step.number}. ${step.name}: ${step.conclusion}`);
+              }
+            }
+            fs.writeFileSync('editor-release-status.txt', `${lines.join('\n')}\n`);
+
+      - name: Fetch previous release notes ref
+        continue-on-error: true
+        run: git fetch origin refs/notes/editor-release-status:refs/notes/editor-release-status
+
+      - name: Push release result as Git note
+        env:
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git notes --ref=editor-release-status add --force --file=editor-release-status.txt "$RELEASE_SHA"
+          git push origin refs/notes/editor-release-status

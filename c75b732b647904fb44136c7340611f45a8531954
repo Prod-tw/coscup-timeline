@@ -1,0 +1,108 @@
+Editor release: success
+Run: https://github.com/Prod-tw/coscup-timeline/actions/runs/30746418499
+Tag: v0.1.3
+
+Build windows-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: success
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Build macos-apple-silicon: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: skipped
+  9. Restore Apple Silicon FFmpeg: success
+  10. Build static Apple Silicon FFmpeg: success
+  11. Add Apple Silicon FFmpeg to PATH: success
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  30. Post Restore Apple Silicon FFmpeg: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Build linux-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: success
+  8. Set up prebuilt FFmpeg: skipped
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: success
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Build macos-intel: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: success
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Publish release: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run actions/setup-node@v7: success
+  4. Run actions/download-artifact@v8: success
+  5. Verify complete release asset set: success
+  6. Create draft release and upload assets: success
+  7. Publish verified release: success
+  13. Post Run actions/setup-node@v7: success
+  14. Post Run actions/checkout@v7: success
+  15. Complete job: success

@@ -1,0 +1,216 @@
+Editor release: failure
+Run: https://github.com/Prod-tw/coscup-timeline/actions/runs/30746030435
+Tag: v0.1.1
+
+Build linux-x86_64: failure
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: failure
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: skipped
+  13. Prepare FFmpeg sidecars: skipped
+  14. Build editor bundles: skipped
+  15. Collect release assets: skipped
+  16. Upload release assets: skipped
+  29. Post Run swatinem/rust-cache@v2: skipped
+  30. Post Run actions/setup-node@v7: skipped
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+
+Log tail for Build linux-x86_64:
+2026-08-02T11:35:05.6764541Z commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+2026-08-02T11:35:05.6765517Z commit-date: 2026-07-14
+2026-08-02T11:35:05.6766327Z host: x86_64-unknown-linux-gnu
+2026-08-02T11:35:05.6767052Z release: 1.97.1
+2026-08-02T11:35:05.6767788Z LLVM version: 22.1.6
+2026-08-02T11:35:05.6785930Z ##[end-action id=__dtolnay_rust-toolchain.__run_10;outcome=success;conclusion=success;duration_ms=28]
+2026-08-02T11:35:05.6872037Z ##[group]Run swatinem/rust-cache@v2
+2026-08-02T11:35:05.6872343Z with:
+2026-08-02T11:35:05.6872546Z   workspaces: . -> target
+2026-08-02T11:35:05.6872780Z   prefix-key: v0-rust
+2026-08-02T11:35:05.6872993Z   add-job-id-key: true
+2026-08-02T11:35:05.6873233Z   add-rust-environment-hash-key: true
+2026-08-02T11:35:05.6873504Z   cache-targets: true
+2026-08-02T11:35:05.6873742Z   cache-all-crates: false
+2026-08-02T11:35:05.6873975Z   cache-workspace-crates: false
+2026-08-02T11:35:05.6874210Z   save-if: true
+2026-08-02T11:35:05.6874409Z   cache-provider: github
+2026-08-02T11:35:05.6874627Z   cache-bin: true
+2026-08-02T11:35:05.6874820Z   lookup-only: false
+2026-08-02T11:35:05.6875021Z   cmd-format: {0}
+2026-08-02T11:35:05.6875207Z env:
+2026-08-02T11:35:05.6875444Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-08-02T11:35:05.6875759Z   CARGO_HOME: /home/runner/.cargo
+2026-08-02T11:35:05.6876007Z   CARGO_INCREMENTAL: 0
+2026-08-02T11:35:05.6876215Z   CARGO_TERM_COLOR: always
+2026-08-02T11:35:05.6876458Z ##[endgroup]
+2026-08-02T11:35:05.9867189Z (node:2574) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-02T11:35:05.9868789Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-02T11:35:07.3911670Z ##[group]Cache Configuration
+2026-08-02T11:35:07.3912926Z Cache Provider:
+2026-08-02T11:35:07.3913655Z     github
+2026-08-02T11:35:07.3914287Z Workspaces:
+2026-08-02T11:35:07.3915388Z     /home/runner/work/coscup-timeline/coscup-timeline
+2026-08-02T11:35:07.3916206Z Cache Paths:
+2026-08-02T11:35:07.3916965Z     /home/runner/.cargo/bin
+2026-08-02T11:35:07.3917834Z     /home/runner/.cargo/.crates.toml
+2026-08-02T11:35:07.3918801Z     /home/runner/.cargo/.crates2.json
+2026-08-02T11:35:07.3941616Z     /home/runner/.cargo/registry
+2026-08-02T11:35:07.3943777Z     /home/runner/.cargo/git
+2026-08-02T11:35:07.3944536Z     /home/runner/work/coscup-timeline/coscup-timeline/target
+2026-08-02T11:35:07.3945175Z Restore Key:
+2026-08-02T11:35:07.3945587Z     v0-rust-build-Linux-x64-db7c195c
+2026-08-02T11:35:07.3946083Z Cache Key:
+2026-08-02T11:35:07.3946582Z     v0-rust-build-Linux-x64-db7c195c-802cc2d2
+2026-08-02T11:35:07.3947082Z .. Prefix:
+2026-08-02T11:35:07.3947430Z   - v0-rust-build-Linux-x64
+2026-08-02T11:35:07.3947895Z .. Environment considered:
+2026-08-02T11:35:07.3948810Z   - Rust Versions:
+2026-08-02T11:35:07.3949493Z     - 1.97.1 x86_64-unknown-linux-gnu 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+2026-08-02T11:35:07.3950458Z     - 1.97.1 x86_64-unknown-linux-gnu 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+2026-08-02T11:35:07.3951430Z   - CARGO_HOME
+2026-08-02T11:35:07.3951804Z   - CARGO_INCREMENTAL
+2026-08-02T11:35:07.3952177Z   - CARGO_TERM_COLOR
+2026-08-02T11:35:07.3952592Z .. Lockfiles considered:
+2026-08-02T11:35:07.3953377Z   - /home/runner/work/coscup-timeline/coscup-timeline/apps/editor/src-tauri/Cargo.toml
+2026-08-02T11:35:07.3954466Z   - /home/runner/work/coscup-timeline/coscup-timeline/apps/server/Cargo.toml
+2026-08-02T11:35:07.3955365Z   - /home/runner/work/coscup-timeline/coscup-timeline/Cargo.lock
+2026-08-02T11:35:07.3956236Z ##[endgroup]
+2026-08-02T11:35:07.3956435Z
+2026-08-02T11:35:07.3956621Z ... Restoring cache ...
+2026-08-02T11:35:07.4908652Z Cache hit for: v0-rust-build-Linux-x64-db7c195c-802cc2d2
+2026-08-02T11:35:08.5890943Z Received 130023424 of 595558950 (21.8%), 124.0 MBs/sec
+2026-08-02T11:35:09.5942568Z Received 310378496 of 595558950 (52.1%), 147.8 MBs/sec
+2026-08-02T11:35:10.5918359Z Received 503316480 of 595558950 (84.5%), 159.8 MBs/sec
+2026-08-02T11:35:11.2005804Z Received 595558950 of 595558950 (100.0%), 157.2 MBs/sec
+2026-08-02T11:35:11.2007523Z Cache Size: ~568 MB (595558950 B)
+2026-08-02T11:35:11.2159538Z [command]/usr/bin/tar -xf /home/runner/work/_temp/c19e4db6-1413-4b08-b7a1-2471d8e07469/cache.tzst -P -C /home/runner/work/coscup-timeline/coscup-timeline --use-compress-program unzstd
+2026-08-02T11:35:14.7397343Z Cache restored successfully
+2026-08-02T11:35:14.7661469Z Restored from cache key "v0-rust-build-Linux-x64-db7c195c-802cc2d2" full match: true.
+2026-08-02T11:35:14.7846491Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+2026-08-02T11:35:14.7847846Z ##[group]Run FedericoCarboni/setup-ffmpeg@v3
+2026-08-02T11:35:14.7848148Z with:
+2026-08-02T11:35:14.7848350Z   architecture: x64
+2026-08-02T11:35:14.7848576Z   ffmpeg-version: release
+2026-08-02T11:35:14.7850873Z   github-token: ***
+2026-08-02T11:35:14.7851382Z env:
+2026-08-02T11:35:14.7851807Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-08-02T11:35:14.7852159Z   CARGO_HOME: /home/runner/.cargo
+2026-08-02T11:35:14.7852417Z   CARGO_INCREMENTAL: 0
+2026-08-02T11:35:14.7852639Z   CARGO_TERM_COLOR: always
+2026-08-02T11:35:14.7852875Z   CACHE_ON_FAILURE: false
+2026-08-02T11:35:14.7853106Z ##[endgroup]
+2026-08-02T11:35:15.2548019Z ##[error]AssertionError [ERR_ASSERTION]: Failed to read version from readme
+2026-08-02T11:35:15.2706082Z Post job cleanup.
+2026-08-02T11:35:15.4185225Z Pruning is unnecessary.
+2026-08-02T11:35:15.4328937Z Post job cleanup.
+2026-08-02T11:35:15.5261174Z [command]/usr/bin/git version
+2026-08-02T11:35:15.5323911Z git version 2.54.0
+2026-08-02T11:35:15.5397801Z Temporarily overriding HOME='/home/runner/work/_temp/64674179-cd7b-44d4-aae1-0e279a3a8e68' before making global git config changes
+2026-08-02T11:35:15.5405653Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-02T11:35:15.5407368Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/coscup-timeline/coscup-timeline
+2026-08-02T11:35:15.5438377Z Removing SSH command configuration
+2026-08-02T11:35:15.5444731Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-02T11:35:15.5505317Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-02T11:35:15.5733154Z Removing HTTP extra header
+2026-08-02T11:35:15.5739149Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-02T11:35:15.5775100Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-02T11:35:15.6001677Z Removing includeIf entries pointing to credentials config files
+2026-08-02T11:35:15.6002527Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-08-02T11:35:15.6027376Z includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path
+2026-08-02T11:35:15.6028266Z includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path
+2026-08-02T11:35:15.6028900Z includeif.gitdir:/github/workspace/.git.path
+2026-08-02T11:35:15.6029378Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-08-02T11:35:15.6036679Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path
+2026-08-02T11:35:15.6058208Z /home/runner/work/_temp/git-credentials-ba6ffb27-5691-4d8c-bc7d-8cd80a521476.config
+2026-08-02T11:35:15.6068577Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-ba6ffb27\-5691\-4d8c\-bc7d\-8cd80a521476\.config
+2026-08-02T11:35:15.6103121Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path
+2026-08-02T11:35:15.6124285Z /home/runner/work/_temp/git-credentials-ba6ffb27-5691-4d8c-bc7d-8cd80a521476.config
+2026-08-02T11:35:15.6133510Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-ba6ffb27\-5691\-4d8c\-bc7d\-8cd80a521476\.config
+2026-08-02T11:35:15.6170941Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-08-02T11:35:15.6192220Z /github/runner_temp/git-credentials-ba6ffb27-5691-4d8c-bc7d-8cd80a521476.config
+2026-08-02T11:35:15.6199654Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-ba6ffb27\-5691\-4d8c\-bc7d\-8cd80a521476\.config
+2026-08-02T11:35:15.6228776Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-08-02T11:35:15.6249027Z /github/runner_temp/git-credentials-ba6ffb27-5691-4d8c-bc7d-8cd80a521476.config
+2026-08-02T11:35:15.6256934Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-ba6ffb27\-5691\-4d8c\-bc7d\-8cd80a521476\.config
+2026-08-02T11:35:15.6288853Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-08-02T11:35:15.6505517Z Removing credentials config '/home/runner/work/_temp/git-credentials-ba6ffb27-5691-4d8c-bc7d-8cd80a521476.config'
+2026-08-02T11:35:15.6659339Z Cleaning up orphan processes
+2026-08-02T11:35:15.6942058Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: FedericoCarboni/setup-ffmpeg@v3. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+
+Build windows-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: success
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Build macos-intel: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: success
+  8. Restore Apple Silicon FFmpeg: skipped
+  9. Build static Apple Silicon FFmpeg: skipped
+  10. Add Apple Silicon FFmpeg to PATH: skipped
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Build macos-apple-silicon: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up prebuilt FFmpeg: skipped
+  8. Restore Apple Silicon FFmpeg: success
+  9. Build static Apple Silicon FFmpeg: success
+  10. Add Apple Silicon FFmpeg to PATH: success
+  11. Install Linux dependencies: skipped
+  12. Install dependencies: success
+  13. Prepare FFmpeg sidecars: success
+  14. Build editor bundles: success
+  15. Collect release assets: success
+  16. Upload release assets: success
+  28. Post Restore Apple Silicon FFmpeg: success
+  29. Post Run swatinem/rust-cache@v2: success
+  30. Post Run actions/setup-node@v7: success
+  31. Post Run pnpm/action-setup@v6: success
+  32. Post Run actions/checkout@v7: success
+  33. Complete job: success
+Publish release: skipped

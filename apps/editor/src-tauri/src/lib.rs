@@ -186,10 +186,8 @@ fn select_output_directory(app: AppHandle) -> Result<Option<String>, String> {
 #[tauri::command]
 async fn check_tools(app: AppHandle) -> ToolStatus {
     ToolStatus {
-        ffmpeg: run_tool(&app, "ffmpeg", &["-version".into()]).await.is_ok(),
-        ffprobe: run_tool(&app, "ffprobe", &["-version".into()])
-            .await
-            .is_ok(),
+        ffmpeg: tool_available(&app, "ffmpeg").await,
+        ffprobe: tool_available(&app, "ffprobe").await,
     }
 }
 
@@ -276,18 +274,31 @@ async fn probe_video(app: &AppHandle, path: &Path) -> Result<VideoInfo, String> 
 }
 
 async fn run_tool(app: &AppHandle, name: &str, args: &[String]) -> Result<Output, String> {
-    let sidecar_name = format!("binaries/coscup-{name}");
-    if let Ok(command) = app.shell().sidecar(sidecar_name) {
-        if let Ok(output) = command.args(args).output().await {
-            return Ok(output);
-        }
-    }
+    let sidecar_error = match app.shell().sidecar(sidecar_binary_name(name)) {
+        Ok(command) => match command.args(args).output().await {
+            Ok(output) => return Ok(output),
+            Err(error) => error.to_string(),
+        },
+        Err(error) => error.to_string(),
+    };
     app.shell()
         .command(name)
         .args(args)
         .output()
         .await
-        .map_err(|error| format!("找不到 {name}: {error}"))
+        .map_err(|error| {
+            format!("無法執行內建 {name}: {sidecar_error}; PATH fallback 也失敗: {error}")
+        })
+}
+
+async fn tool_available(app: &AppHandle, name: &str) -> bool {
+    run_tool(app, name, &["-version".into()])
+        .await
+        .is_ok_and(|output| output.status.success())
+}
+
+fn sidecar_binary_name(name: &str) -> String {
+    format!("coscup-{name}")
 }
 
 fn ensure_success(name: &str, output: Output) -> Result<Output, String> {
@@ -402,6 +413,12 @@ mod tests {
         let args = ffmpeg_args(&job, Path::new("/tmp/clip.mp4"));
         assert!(args.windows(2).any(|pair| pair == ["-c", "copy"]));
         assert_eq!(args.last().unwrap(), "/tmp/clip.mp4");
+    }
+
+    #[test]
+    fn sidecar_uses_packaged_binary_basename() {
+        assert_eq!(sidecar_binary_name("ffmpeg"), "coscup-ffmpeg");
+        assert_eq!(sidecar_binary_name("ffprobe"), "coscup-ffprobe");
     }
 
     #[test]

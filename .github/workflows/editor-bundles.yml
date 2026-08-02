@@ -59,18 +59,18 @@ jobs:
         if: matrix.ffmpeg == 'prebuilt' && runner.os == 'Linux'
         shell: bash
         run: |
-          archive="$RUNNER_TEMP/ffmpeg-7.0.2-amd64-static.tar.xz"
-          install_dir="$RUNNER_TOOL_CACHE/coscup-ffmpeg-7.0.2-linux-x64"
+          archive="$RUNNER_TEMP/ffmpeg-n8.1.2-34-g9b6c8969e0-linux64-gpl-8.1.tar.xz"
+          install_dir="$RUNNER_TEMP/coscup-ffmpeg-8.1-linux-x64"
           curl --fail --location --silent --show-error \
-            https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-amd64-static.tar.xz \
+            https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-08-01-13-21/ffmpeg-n8.1.2-34-g9b6c8969e0-linux64-gpl-8.1.tar.xz \
             --output "$archive"
-          echo "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67  $archive" \
+          echo "7f44d96cf551ac1d3c8641867ec1676a764b7179acc35fd39bf17803cdffe522  $archive" \
             | sha256sum --check
           mkdir -p "$install_dir"
           tar -xf "$archive" -C "$install_dir" --strip-components=1
-          "$install_dir/ffmpeg" -version
-          "$install_dir/ffprobe" -version
-          echo "$install_dir" >> "$GITHUB_PATH"
+          "$install_dir/bin/ffmpeg" -version
+          "$install_dir/bin/ffprobe" -version
+          echo "$install_dir/bin" >> "$GITHUB_PATH"
 
       - name: Set up prebuilt FFmpeg
         if: matrix.ffmpeg == 'prebuilt' && runner.os != 'Linux'

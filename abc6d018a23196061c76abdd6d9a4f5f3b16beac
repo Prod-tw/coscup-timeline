@@ -1,0 +1,220 @@
+Editor release: failure
+Run: https://github.com/Prod-tw/coscup-timeline/actions/runs/30746222625
+Tag: v0.1.2
+
+Build linux-x86_64: failure
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: failure
+  8. Set up prebuilt FFmpeg: skipped
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: skipped
+  14. Prepare FFmpeg sidecars: skipped
+  15. Build editor bundles: skipped
+  16. Collect release assets: skipped
+  17. Upload release assets: skipped
+  31. Post Run swatinem/rust-cache@v2: skipped
+  32. Post Run actions/setup-node@v7: skipped
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+
+Log tail for Build linux-x86_64:
+2026-08-02T11:40:35.9936686Z   prefix-key: v0-rust
+2026-08-02T11:40:35.9936901Z   add-job-id-key: true
+2026-08-02T11:40:35.9937132Z   add-rust-environment-hash-key: true
+2026-08-02T11:40:35.9937398Z   cache-targets: true
+2026-08-02T11:40:35.9937629Z   cache-all-crates: false
+2026-08-02T11:40:35.9937853Z   cache-workspace-crates: false
+2026-08-02T11:40:35.9938073Z   save-if: true
+2026-08-02T11:40:35.9938323Z   cache-provider: github
+2026-08-02T11:40:35.9938556Z   cache-bin: true
+2026-08-02T11:40:35.9938762Z   lookup-only: false
+2026-08-02T11:40:35.9938960Z   cmd-format: {0}
+2026-08-02T11:40:35.9939139Z env:
+2026-08-02T11:40:35.9939377Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-08-02T11:40:35.9939698Z   CARGO_HOME: /home/runner/.cargo
+2026-08-02T11:40:35.9939943Z   CARGO_INCREMENTAL: 0
+2026-08-02T11:40:35.9940151Z   CARGO_TERM_COLOR: always
+2026-08-02T11:40:35.9940609Z ##[endgroup]
+2026-08-02T11:40:36.1864514Z (node:2226) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-08-02T11:40:36.1865400Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-08-02T11:40:36.3006585Z ##[group]Cache Configuration
+2026-08-02T11:40:36.3007259Z Cache Provider:
+2026-08-02T11:40:36.3007857Z     github
+2026-08-02T11:40:36.3008255Z Workspaces:
+2026-08-02T11:40:36.3008755Z     /home/runner/work/coscup-timeline/coscup-timeline
+2026-08-02T11:40:36.3009281Z Cache Paths:
+2026-08-02T11:40:36.3009725Z     /home/runner/.cargo/bin
+2026-08-02T11:40:36.3010186Z     /home/runner/.cargo/.crates.toml
+2026-08-02T11:40:36.3010877Z     /home/runner/.cargo/.crates2.json
+2026-08-02T11:40:36.3011346Z     /home/runner/.cargo/registry
+2026-08-02T11:40:36.3011828Z     /home/runner/.cargo/git
+2026-08-02T11:40:36.3012356Z     /home/runner/work/coscup-timeline/coscup-timeline/target
+2026-08-02T11:40:36.3113082Z Restore Key:
+2026-08-02T11:40:36.3114676Z     v0-rust-build-Linux-x64-db7c195c
+2026-08-02T11:40:36.3114923Z Cache Key:
+2026-08-02T11:40:36.3115198Z     v0-rust-build-Linux-x64-db7c195c-802cc2d2
+2026-08-02T11:40:36.3115426Z .. Prefix:
+2026-08-02T11:40:36.3115593Z   - v0-rust-build-Linux-x64
+2026-08-02T11:40:36.3115807Z .. Environment considered:
+2026-08-02T11:40:36.3116213Z   - Rust Versions:
+2026-08-02T11:40:36.3116488Z     - 1.97.1 x86_64-unknown-linux-gnu 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+2026-08-02T11:40:36.3116931Z     - 1.97.1 x86_64-unknown-linux-gnu 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+2026-08-02T11:40:36.3117211Z   - CARGO_HOME
+2026-08-02T11:40:36.3117384Z   - CARGO_INCREMENTAL
+2026-08-02T11:40:36.3117551Z   - CARGO_TERM_COLOR
+2026-08-02T11:40:36.3117734Z .. Lockfiles considered:
+2026-08-02T11:40:36.3118066Z   - /home/runner/work/coscup-timeline/coscup-timeline/apps/editor/src-tauri/Cargo.toml
+2026-08-02T11:40:36.3118522Z   - /home/runner/work/coscup-timeline/coscup-timeline/apps/server/Cargo.toml
+2026-08-02T11:40:36.3118894Z   - /home/runner/work/coscup-timeline/coscup-timeline/Cargo.lock
+2026-08-02T11:40:36.3119304Z ##[endgroup]
+2026-08-02T11:40:36.3119402Z
+2026-08-02T11:40:36.3119501Z ... Restoring cache ...
+2026-08-02T11:40:36.4404744Z Cache hit for: v0-rust-build-Linux-x64-db7c195c-802cc2d2
+2026-08-02T11:40:37.5656230Z Received 121634816 of 595558950 (20.4%), 116.0 MBs/sec
+2026-08-02T11:40:38.5658167Z Received 293601280 of 595558950 (49.3%), 140.0 MBs/sec
+2026-08-02T11:40:39.5656465Z Received 494927872 of 595558950 (83.1%), 157.3 MBs/sec
+2026-08-02T11:40:40.3128231Z Received 595558950 of 595558950 (100.0%), 151.7 MBs/sec
+2026-08-02T11:40:40.3142784Z Cache Size: ~568 MB (595558950 B)
+2026-08-02T11:40:40.3233052Z [command]/usr/bin/tar -xf /home/runner/work/_temp/21a0c54b-4734-48d2-b71e-29baf5a604e3/cache.tzst -P -C /home/runner/work/coscup-timeline/coscup-timeline --use-compress-program unzstd
+2026-08-02T11:40:48.7316827Z Cache restored successfully
+2026-08-02T11:40:48.7506910Z Restored from cache key "v0-rust-build-Linux-x64-db7c195c-802cc2d2" full match: true.
+2026-08-02T11:40:48.7598264Z ##[group]Run archive="$RUNNER_TEMP/ffmpeg-7.0.2-amd64-static.tar.xz"
+2026-08-02T11:40:48.7598673Z archive="$RUNNER_TEMP/ffmpeg-7.0.2-amd64-static.tar.xz"
+2026-08-02T11:40:48.7598987Z install_dir="$RUNNER_TOOL_CACHE/coscup-ffmpeg-7.0.2-linux-x64"
+2026-08-02T11:40:48.7599300Z curl --fail --location --silent --show-error \
+2026-08-02T11:40:48.7599636Z   https://johnvansickle.com/ffmpeg/releases/ffmpeg-7.0.2-amd64-static.tar.xz \
+2026-08-02T11:40:48.7599951Z   --output "$archive"
+2026-08-02T11:40:48.7600246Z echo "abda8d77ce8309141f83ab8edf0596834087c52467f6badf376a6a2a4c87cf67  $archive" \
+2026-08-02T11:40:48.7600865Z   | sha256sum --check
+2026-08-02T11:40:48.7601064Z mkdir -p "$install_dir"
+2026-08-02T11:40:48.7601303Z tar -xf "$archive" -C "$install_dir" --strip-components=1
+2026-08-02T11:40:48.7601556Z "$install_dir/ffmpeg" -version
+2026-08-02T11:40:48.7601796Z "$install_dir/ffprobe" -version
+2026-08-02T11:40:48.7602016Z echo "$install_dir" >> "$GITHUB_PATH"
+2026-08-02T11:40:48.7625310Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-08-02T11:40:48.7625567Z env:
+2026-08-02T11:40:48.7625761Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-08-02T11:40:48.7626017Z   CARGO_HOME: /home/runner/.cargo
+2026-08-02T11:40:48.7626209Z   CARGO_INCREMENTAL: 0
+2026-08-02T11:40:48.7626382Z   CARGO_TERM_COLOR: always
+2026-08-02T11:40:48.7626550Z   CACHE_ON_FAILURE: false
+2026-08-02T11:40:48.7626715Z ##[endgroup]
+2026-08-02T11:40:49.2112723Z sha256sum: WARNING: 1 computed checksum did NOT match
+2026-08-02T11:40:49.2113150Z /home/runner/work/_temp/ffmpeg-7.0.2-amd64-static.tar.xz: FAILED
+2026-08-02T11:40:49.2121913Z ##[error]Process completed with exit code 1.
+2026-08-02T11:40:49.2212496Z Post job cleanup.
+2026-08-02T11:40:49.3209906Z Pruning is unnecessary.
+2026-08-02T11:40:49.3287894Z Post job cleanup.
+2026-08-02T11:40:49.3873872Z [command]/usr/bin/git version
+2026-08-02T11:40:49.3897332Z git version 2.54.0
+2026-08-02T11:40:49.3920168Z Temporarily overriding HOME='/home/runner/work/_temp/069e51cb-ef9f-4bf3-ae3c-48a2573d5b22' before making global git config changes
+2026-08-02T11:40:49.3921198Z Adding repository directory to the temporary git global config as a safe directory
+2026-08-02T11:40:49.3930676Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/coscup-timeline/coscup-timeline
+2026-08-02T11:40:49.4929976Z Removing SSH command configuration
+2026-08-02T11:40:49.4935694Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-08-02T11:40:49.4962910Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-08-02T11:40:49.5109956Z Removing HTTP extra header
+2026-08-02T11:40:49.5114184Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-08-02T11:40:49.5133626Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-08-02T11:40:49.5265309Z Removing includeIf entries pointing to credentials config files
+2026-08-02T11:40:49.5269058Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-08-02T11:40:49.5283226Z includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path
+2026-08-02T11:40:49.5283861Z includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path
+2026-08-02T11:40:49.5284326Z includeif.gitdir:/github/workspace/.git.path
+2026-08-02T11:40:49.5284701Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-08-02T11:40:49.5288205Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path
+2026-08-02T11:40:49.5301649Z /home/runner/work/_temp/git-credentials-4e054882-85fb-4c1e-b46d-3a003c9ab839.config
+2026-08-02T11:40:49.5307939Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-4e054882\-85fb\-4c1e\-b46d\-3a003c9ab839\.config
+2026-08-02T11:40:49.6331578Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path
+2026-08-02T11:40:49.6347281Z /home/runner/work/_temp/git-credentials-4e054882-85fb-4c1e-b46d-3a003c9ab839.config
+2026-08-02T11:40:49.6353125Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/coscup-timeline/coscup-timeline/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-4e054882\-85fb\-4c1e\-b46d\-3a003c9ab839\.config
+2026-08-02T11:40:49.7801484Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-08-02T11:40:49.7814272Z /github/runner_temp/git-credentials-4e054882-85fb-4c1e-b46d-3a003c9ab839.config
+2026-08-02T11:40:49.7818027Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-4e054882\-85fb\-4c1e\-b46d\-3a003c9ab839\.config
+2026-08-02T11:40:49.8914372Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-08-02T11:40:49.8928340Z /github/runner_temp/git-credentials-4e054882-85fb-4c1e-b46d-3a003c9ab839.config
+2026-08-02T11:40:49.8933177Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-4e054882\-85fb\-4c1e\-b46d\-3a003c9ab839\.config
+2026-08-02T11:40:50.0003373Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-08-02T11:40:50.0130765Z Removing credentials config '/home/runner/work/_temp/git-credentials-4e054882-85fb-4c1e-b46d-3a003c9ab839.config'
+2026-08-02T11:40:50.0215418Z Cleaning up orphan processes
+
+Build windows-x86_64: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: success
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Build macos-apple-silicon: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: skipped
+  9. Restore Apple Silicon FFmpeg: success
+  10. Build static Apple Silicon FFmpeg: success
+  11. Add Apple Silicon FFmpeg to PATH: success
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  30. Post Restore Apple Silicon FFmpeg: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Build macos-intel: success
+  1. Set up job: success
+  2. Run actions/checkout@v7: success
+  3. Run pnpm/action-setup@v6: success
+  4. Run actions/setup-node@v7: success
+  5. Run dtolnay/rust-toolchain@stable: success
+  6. Run swatinem/rust-cache@v2: success
+  7. Set up pinned Linux FFmpeg: skipped
+  8. Set up prebuilt FFmpeg: success
+  9. Restore Apple Silicon FFmpeg: skipped
+  10. Build static Apple Silicon FFmpeg: skipped
+  11. Add Apple Silicon FFmpeg to PATH: skipped
+  12. Install Linux dependencies: skipped
+  13. Install dependencies: success
+  14. Prepare FFmpeg sidecars: success
+  15. Build editor bundles: success
+  16. Collect release assets: success
+  17. Upload release assets: success
+  31. Post Run swatinem/rust-cache@v2: success
+  32. Post Run actions/setup-node@v7: success
+  33. Post Run pnpm/action-setup@v6: success
+  34. Post Run actions/checkout@v7: success
+  35. Complete job: success
+Publish release: skipped

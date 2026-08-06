@@ -22,7 +22,7 @@ export interface Marker {
 
 export interface ServerEvent {
   id: number;
-  room_id: number;
+  room_id: string;
   recorded_at: string;
   recorded_at_ms: number;
   source: string;

@@ -122,9 +122,9 @@ function App() {
 
   async function importServerTimes(event: FormEvent) {
     event.preventDefault();
-    const id = Number(roomId);
-    if (!Number.isInteger(id) || id <= 0) {
-      setError("廳 ID 必須是正整數");
+    const id = roomId.trim();
+    if (id === "") {
+      setError("廳 ID 不可為空");
       return;
     }
     setLoadingServer(true);
@@ -365,7 +365,7 @@ function App() {
             <input id="server-url" type="url" value={serverUrl} onChange={(event) => setServerUrl(event.target.value)} />
             <label htmlFor="room-id">廳 ID</label>
             <div className="inline-field">
-              <input id="room-id" type="number" min="1" value={roomId} onChange={(event) => setRoomId(event.target.value)} />
+              <input id="room-id" type="text" value={roomId} onChange={(event) => setRoomId(event.target.value)} />
               <button type="submit" disabled={loadingServer}>{loadingServer ? "匯入中" : "匯入"}</button>
             </div>
             {lastImportCount !== null && <p className="import-status"><CheckCircle size={14} weight="fill" />已匯入 {lastImportCount} 個時間針</p>}

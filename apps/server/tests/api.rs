@@ -46,7 +46,7 @@ async fn button_post_records_only_server_time_and_room() {
     assert_eq!(response.status(), StatusCode::CREATED);
     let body: Value =
         serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes()).unwrap();
-    assert_eq!(body["room_id"], 209);
+    assert_eq!(body["room_id"], "209");
     assert_eq!(body["recorded_at_ms"], 1_775_100_634_000_i64);
     assert_eq!(body["marker_type"], "start");
 
@@ -121,10 +121,28 @@ async fn rejects_invalid_room_ids() {
         .oneshot(
             Request::post("/api/v1/events")
                 .header("content-type", "application/json")
-                .body(Body::from(r#"{"room_id":0}"#))
+                .body(Body::from(r#"{"room_id":"  "}"#))
                 .unwrap(),
         )
         .await
         .unwrap();
     assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+}
+
+#[tokio::test]
+async fn accepts_prefixed_string_room_id() {
+    let (app, _temp) = test_app().await;
+    let response = app
+        .oneshot(
+            Request::post("/api/v1/events")
+                .header("content-type", "application/json")
+                .body(Body::from(json!({"room_id": "RB105"}).to_string()))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::CREATED);
+    let body: Value =
+        serde_json::from_slice(&response.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    assert_eq!(body["room_id"], "RB105");
 }

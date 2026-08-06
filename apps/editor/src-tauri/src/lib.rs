@@ -105,16 +105,17 @@ async fn select_video_file(app: AppHandle) -> Result<Option<VideoInfo>, String> 
 #[tauri::command]
 async fn import_server_events(
     server_url: String,
-    room_id: i64,
+    room_id: String,
 ) -> Result<Vec<ServerEvent>, String> {
-    if room_id <= 0 {
-        return Err("廳 ID 必須是正整數".into());
+    let room_id = room_id.trim();
+    if room_id.is_empty() {
+        return Err("廳 ID 不可為空".into());
     }
     let url = server_events_url(&server_url, room_id)?;
     fetch_json(url).await
 }
 
-fn server_events_url(server_url: &str, room_id: i64) -> Result<reqwest::Url, String> {
+fn server_events_url(server_url: &str, room_id: &str) -> Result<reqwest::Url, String> {
     let mut url = reqwest::Url::parse(server_url.trim())
         .map_err(|_| "Server URL 格式無效，請輸入 http:// 或 https:// 網址".to_string())?;
     if !matches!(url.scheme(), "http" | "https") || url.host().is_none() {
@@ -122,11 +123,10 @@ fn server_events_url(server_url: &str, room_id: i64) -> Result<reqwest::Url, Str
     }
     url.set_query(None);
     url.set_fragment(None);
-    let room_id = room_id.to_string();
     url.path_segments_mut()
         .map_err(|_| "Server URL 無法附加 API 路徑".to_string())?
         .pop_if_empty()
-        .extend(["api", "v1", "rooms", room_id.as_str(), "events"]);
+        .extend(["api", "v1", "rooms", room_id, "events"]);
     Ok(url)
 }
 
@@ -423,17 +423,23 @@ mod tests {
 
     #[test]
     fn builds_server_event_url_and_preserves_base_path() {
-        let url = server_events_url("https://times.example.test/coscup/?debug=1", 209).unwrap();
+        let url = server_events_url("https://times.example.test/coscup/?debug=1", "209").unwrap();
         assert_eq!(
             url.as_str(),
             "https://times.example.test/coscup/api/v1/rooms/209/events"
+        );
+
+        let prefixed = server_events_url("https://times.example.test/", "RB105").unwrap();
+        assert_eq!(
+            prefixed.as_str(),
+            "https://times.example.test/api/v1/rooms/RB105/events"
         );
     }
 
     #[test]
     fn rejects_non_http_server_urls() {
-        assert!(server_events_url("file:///tmp/events.json", 209).is_err());
-        assert!(server_events_url("localhost:3000", 209).is_err());
+        assert!(server_events_url("file:///tmp/events.json", "209").is_err());
+        assert!(server_events_url("localhost:3000", "209").is_err());
     }
 
     #[test]
@@ -456,7 +462,7 @@ mod tests {
             .unwrap();
         });
 
-        let url = server_events_url(&format!("http://{address}"), 209).unwrap();
+        let url = server_events_url(&format!("http://{address}"), "209").unwrap();
         let events: Vec<ServerEvent> = tauri::async_runtime::block_on(fetch_json(url)).unwrap();
         server.join().unwrap();
         assert_eq!(events.len(), 1);

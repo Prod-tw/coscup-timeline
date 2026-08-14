@@ -44,6 +44,9 @@
       "icons/icon.ico"
     ],
     "category": "Video",
-    "shortDescription": "COSCUP session recording cutter"
+    "shortDescription": "COSCUP session recording cutter",
+    "macOS": {
+      "signingIdentity": "-"
+    }
   }
 }

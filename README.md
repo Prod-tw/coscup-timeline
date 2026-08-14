@@ -33,7 +33,7 @@ curl -X POST http://localhost:3000/api/v1/events \
 ### Docker
 
 ```bash
-docker compose up --build
+docker compose up -d
 ```
 
 Dashboard：<http://localhost:3000>。SQLite 位於 named volume `time-data`。
@@ -117,6 +117,14 @@ pnpm editor:build
 - `coscup-cut-windows-x64`
 
 Push 完成後，到 GitHub repository 的 **Actions > Editor bundles**，打開成功的 workflow run，在 **Artifacts** 區塊下載。Artifact 保留 30 天；Windows ZIP 內包含 NSIS `.exe` 與 MSI `.msi`。macOS 目前是 Intel x64 bundle，在 Apple Silicon 上需要 Rosetta。
+
+### macOS 首次開啟
+
+bundle 只有 ad-hoc 簽章（沒有 Apple Developer 憑證），下載後第一次開啟會被 Gatekeeper 擋下。用右鍵 > 打開，或先移除 quarantine：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/COSCUP Cut.app"
+```
 
 ## 驗證
 

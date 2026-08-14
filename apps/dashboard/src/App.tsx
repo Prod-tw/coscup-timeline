@@ -15,7 +15,7 @@ const REFRESH_INTERVAL = 10_000;
 
 function App() {
   const [rooms, setRooms] = useState<RoomSummary[]>([]);
-  const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [events, setEvents] = useState<TimeEvent[]>([]);
   const [roomInput, setRoomInput] = useState("209");
   const [manualTime, setManualTime] = useState("");
@@ -25,7 +25,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
-  const refresh = useCallback(async (preferredRoom?: number) => {
+  const refresh = useCallback(async (preferredRoom?: string) => {
     try {
       const [roomData] = await Promise.all([api.rooms(), api.health()]);
       setRooms(roomData);
@@ -51,9 +51,9 @@ function App() {
 
   async function submitRecord(event: FormEvent) {
     event.preventDefault();
-    const roomId = Number(roomInput);
-    if (!Number.isInteger(roomId) || roomId <= 0) {
-      setError("廳 ID 必須是正整數");
+    const roomId = roomInput.trim();
+    if (!roomId) {
+      setError("廳 ID 不可為空");
       return;
     }
     setSubmitting(true);
@@ -126,9 +126,7 @@ function App() {
             <label htmlFor="room-id">廳 ID</label>
             <input
               id="room-id"
-              inputMode="numeric"
-              min="1"
-              type="number"
+              type="text"
               value={roomInput}
               onChange={(event) => setRoomInput(event.target.value)}
             />

@@ -24,63 +24,6 @@ use tower_http::{
 pub struct AppState {
     pool: SqlitePool,
     clock: Arc<dyn Clock>,
-    rozeta: Option<Arc<Rozeta>>,
-}
-
-/// Outbound client that asks Rozeta to advance a room to its next talk and start it.
-/// Enabled only when ROZETA_API_TOKEN is set; otherwise button presses just record time.
-struct Rozeta {
-    client: reqwest::Client,
-    base_url: String,
-    token: String,
-}
-
-impl Rozeta {
-    // ponytail: env read in the lib keeps build_app/tests signature-stable; unset token => disabled.
-    fn from_env() -> Option<Arc<Self>> {
-        let token = std::env::var("ROZETA_API_TOKEN").ok()?;
-        let base_url = std::env::var("ROZETA_BASE_URL")
-            .unwrap_or_else(|_| "https://rozeta.coscup.prod.tw".into());
-        Some(Arc::new(Self {
-            client: reqwest::Client::new(),
-            base_url: base_url.trim_end_matches('/').to_string(),
-            token,
-        }))
-    }
-
-    // Fire-and-forget: recording server time must not block on Rozeta latency or failures.
-    fn advance_and_start(self: Arc<Self>, room_id: String) {
-        tokio::spawn(async move {
-            let url = format!(
-                "{}/api/v1/rooms/{}/actions/advance-and-start",
-                self.base_url,
-                rozeta_room_name(&room_id),
-            );
-            match self.client.post(&url).bearer_auth(&self.token).send().await {
-                Ok(resp) if resp.status().is_success() => {
-                    tracing::info!(room_id, status = %resp.status(), "rozeta advance-and-start accepted")
-                }
-                Ok(resp) => {
-                    let status = resp.status();
-                    let body = resp.text().await.unwrap_or_default();
-                    tracing::warn!(room_id, %status, body, "rozeta advance-and-start rejected")
-                }
-                Err(err) => {
-                    tracing::error!(room_id, error = %err, "rozeta advance-and-start failed")
-                }
-            }
-        });
-    }
-}
-
-/// Rozeta room names are prefixed. An all-digit room_id gains a `TR` prefix (209 -> "TR209");
-/// an already-prefixed one is used as-is ("RB105" -> "RB105").
-fn rozeta_room_name(room_id: &str) -> String {
-    if !room_id.is_empty() && room_id.bytes().all(|b| b.is_ascii_digit()) {
-        format!("TR{room_id}")
-    } else {
-        room_id.to_string()
-    }
 }
 
 pub trait Clock: Send + Sync {
@@ -238,11 +181,7 @@ pub fn build_app_with_clock(
     dashboard_dir: PathBuf,
     clock: Arc<dyn Clock>,
 ) -> Router {
-    let state = AppState {
-        pool,
-        clock,
-        rozeta: Rozeta::from_env(),
-    };
+    let state = AppState { pool, clock };
     let api = Router::new()
         .route("/health", get(health))
         .route("/events", post(record_event))
@@ -288,9 +227,6 @@ async fn record_event(
     let now = state.clock.now_ms();
     let row = insert_event(&state.pool, &room_id, now, "button", now).await?;
     let position = event_position(&state.pool, &row.room_id, row.id).await?;
-    if let Some(rozeta) = &state.rozeta {
-        rozeta.clone().advance_and_start(row.room_id.clone());
-    }
     Ok((StatusCode::CREATED, Json(to_event(row, position))))
 }
 
@@ -464,11 +400,5 @@ mod unit_tests {
     fn accepts_rfc3339_offsets_and_normalizes_to_utc() {
         let value = parse_timestamp("2026-07-31T11:10:34+08:00").unwrap();
         assert_eq!(format_timestamp(value), "2026-07-31T03:10:34.000Z");
-    }
-
-    #[test]
-    fn prefixes_numeric_room_id_for_rozeta() {
-        assert_eq!(rozeta_room_name("209"), "TR209");
-        assert_eq!(rozeta_room_name("RB105"), "RB105");
     }
 }

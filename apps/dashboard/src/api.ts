@@ -2,7 +2,7 @@ export type MarkerType = "start" | "end";
 
 export interface TimeEvent {
   id: number;
-  room_id: number;
+  room_id: string;
   recorded_at: string;
   recorded_at_ms: number;
   source: "button" | "manual" | "dashboard";
@@ -12,7 +12,7 @@ export interface TimeEvent {
 }
 
 export interface RoomSummary {
-  room_id: number;
+  room_id: string;
   marker_count: number;
   completed_segment_count: number;
   has_unpaired_marker: boolean;
@@ -39,14 +39,14 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   rooms: () => request<RoomSummary[]>("/api/v1/rooms"),
-  events: (roomId: number) => request<TimeEvent[]>(`/api/v1/rooms/${roomId}/events`),
-  record: (roomId: number) =>
+  events: (roomId: string) => request<TimeEvent[]>(`/api/v1/rooms/${encodeURIComponent(roomId)}/events`),
+  record: (roomId: string) =>
     request<TimeEvent>("/api/v1/events", {
       method: "POST",
       body: JSON.stringify({ room_id: roomId }),
     }),
-  addManual: (roomId: number, recordedAt: string) =>
-    request<TimeEvent>(`/api/v1/rooms/${roomId}/events`, {
+  addManual: (roomId: string, recordedAt: string) =>
+    request<TimeEvent>(`/api/v1/rooms/${encodeURIComponent(roomId)}/events`, {
       method: "POST",
       body: JSON.stringify({ recorded_at: recordedAt }),
     }),

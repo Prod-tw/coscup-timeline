@@ -1,6 +1,7 @@
 services:
   time-server:
-    build: .
+    image: image.prod.tw/coscup-time-server:latest
+    pull_policy: always
     ports:
       - "3000:3000"
     volumes:
@@ -9,4 +10,3 @@ services:
 
 volumes:
   time-data:
-

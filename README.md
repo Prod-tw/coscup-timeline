@@ -87,7 +87,7 @@ pnpm editor:build
 
 `scripts/prepare-sidecars.mjs` 會依 Rust target triple 複製兩個 binary，再由 Tauri `externalBin` 收進 bundle。GitHub Actions 會建置 Linux、macOS、Windows 三平台並上傳 artifact。
 
-本機 bundle 會原樣複製目前 `PATH` 上的 FFmpeg；Linux 發行版套件提供的 binary 通常會動態連結系統函式庫，因此產出的安裝檔只適合相容的本機環境。要提供給其他使用者下載時，請使用 GitHub Actions 在各目標平台產生的 artifact；workflow 會從 FFmpeg 的平台 build 來源下載 `ffmpeg` 與 `ffprobe` 後再打包。目前 FFmpeg action 的 macOS build 僅支援 x64，因此 CI 明確建置 `x86_64-apple-darwin`，產物在 Apple Silicon 上需要 Rosetta。
+本機 bundle 會原樣複製目前 `PATH` 上的 FFmpeg；Linux 發行版套件提供的 binary 通常會動態連結系統函式庫，因此產出的安裝檔只適合相容的本機環境。要提供給其他使用者下載時，請使用 GitHub Actions 在各目標平台產生的 artifact；workflow 會從 FFmpeg 的平台 build 來源下載 `ffmpeg` 與 `ffprobe` 後再打包。Apple Silicon 沒有現成的 arm64 build，CI 會自行編譯靜態 FFmpeg（含 x264）後打進 bundle。
 
 FFmpeg 的實際授權條款取決於 bundle 使用的 build flags。對外發布安裝檔前，請保留對應 FFmpeg build 的 license 與 source offer，並確認是否包含 GPL codec。
 
@@ -112,11 +112,12 @@ pnpm editor:build
 
 [`.github/workflows/editor-bundles.yml`](.github/workflows/editor-bundles.yml) 會在每次 push 或從 Actions 頁面手動執行時，平行建置：
 
-- `coscup-cut-linux-x64`
-- `coscup-cut-macos-x64`
-- `coscup-cut-windows-x64`
+- `coscup-cut-linux-x86_64`
+- `coscup-cut-macos-intel`
+- `coscup-cut-macos-apple-silicon`
+- `coscup-cut-windows-x86_64`
 
-Push 完成後，到 GitHub repository 的 **Actions > Editor bundles**，打開成功的 workflow run，在 **Artifacts** 區塊下載。Artifact 保留 30 天；Windows ZIP 內包含 NSIS `.exe` 與 MSI `.msi`。macOS 目前是 Intel x64 bundle，在 Apple Silicon 上需要 Rosetta。
+Workflow 由 `v*` tag 觸發，四個平台建置完成後會自動建立 GitHub Release 並上傳所有安裝檔。
 
 ### macOS 首次開啟
 

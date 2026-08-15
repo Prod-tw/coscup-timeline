@@ -7,4 +7,8 @@
 
 安裝檔內已包含 FFmpeg 與 FFprobe，不需要另外安裝。
 
-此版本尚未使用平台商業憑證簽署，Windows SmartScreen 或 macOS Gatekeeper 可能會顯示安全提示。
+此版本尚未使用平台商業憑證簽署，Windows SmartScreen 或 macOS Gatekeeper 可能會顯示安全提示。macOS 請用右鍵 > 打開，或先執行：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/COSCUP Cut.app"
+```
